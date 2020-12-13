@@ -207,6 +207,12 @@ void GFX_drawChannelCursor(Gfx *g, uint32_t color, float Voffset, float Vscale, 
     SDL_FreeSurface(cursor);
 }
 
+
+void GFX_drawCursor(Gfx *g, uint32_t color, float offset, float scale, uint32_t px_div, uint32_t px_center, uint32_t cursor_dir){
+
+}
+
+
 void GFX_loadTTF(Gfx *g, char *path, int ptsize){
     g->font = TTF_OpenFont(path, ptsize);
 }
@@ -263,7 +269,6 @@ void GFX_toEngNotation(double d, int digits, int precision, char *p){
                 break;
         }
     }else{
-        strcat(param, " ");
         sprintf(p, param, 0.0);
     }
 }
@@ -274,7 +279,7 @@ void GFX_printScopeInfo(Gfx *g, int x_offset, int y, float time_scale, float tim
     SDL_Surface *text;
     GFX_toEngNotation((double)time_scale, 5, 1, scale);
     GFX_toEngNotation((double)time_offset, 5, 1, offset);
-    sprintf(buff, "Time: %ss | Offs: %ss", scale, offset);
+    snprintf(buff, sizeof(buff), "Time: %ss | Offs: %ss", scale, offset);
     SDL_Color c = {color& 0xFF , (color >> 8) & 0xFF, (color >> 16) & 0xFF, (color >> 24) & 0xFF};
     text = TTF_RenderText_Solid(g->font, buff, c);
     if (text == NULL){
@@ -292,7 +297,7 @@ void GFX_printChannelInfo(Gfx *g, int channel, int x_offset, int y, int y_offset
     SDL_Surface *text;
     GFX_toEngNotation((double)Vscale, 4, 2, scale);
     GFX_toEngNotation((double)Voffset, 4, 2, offset);
-    sprintf(buff, "CH%d: %sV | %sV", channel, scale, offset);
+    snprintf(buff, sizeof(buff), "CH%d: %sV | %sV", channel, scale, offset);
     SDL_Color c = {color& 0xFF , (color >> 8) & 0xFF, (color >> 16) & 0xFF, (color >> 24) & 0xFF};
     text = TTF_RenderText_Solid(g->font, buff,  c);
     if (text == NULL){

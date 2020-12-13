@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 #endif
     }else{
         SCOPE_closeVISA(scope);
-        printf("Device not supported.\n");
+        printf("Device not supported.\nDevice: %s.\n", scope->deviceID);
         return -1; // device not supported
     }
 
@@ -56,19 +56,14 @@ int main(int argc, char* argv[]){
     }
 
     scope->fct.setLongMemory(scope);
-    scope->fct.chanEnable(scope, 2);
     scope->fct.sampleRate(scope);
     scope->fct.timeScale(scope);
     scope->fct.timeOffset(scope);
     scope->fct.chanVScale(scope, 1);
     scope->fct.chanVOffset(scope, 1);
     scope->fct.chanProbe(scope, 1);
-    scope->fct.chanVScale(scope, 2);
-    scope->fct.chanVOffset(scope, 2);
-    scope->fct.chanProbe(scope, 2);
     scope->fct.run(scope);
     scope->fct.printChannelInfo(scope, 1);
-    scope->fct.printChannelInfo(scope, 2);
 
     Gfx *gfx;
     gfx = GFX_initWindow(scope->screen.zoom, scope->screen.width * scope->screen.zoom + BORDER, (scope->screen.height + TEXT_INFO_Y * scope->channels) * scope->screen.zoom + BORDER);
@@ -93,8 +88,6 @@ int main(int argc, char* argv[]){
     }
     GFX_generateBg(gfx, scope->screen.px_vert_div, scope->screen.px_hori_div);
 
-    SDL_Window *mouse_w; // used to detect if mouse is inside window or not
-
     for (i = 0; i < scope->channels; i++){
         if (scope->fct.isChanEnabled(scope, i + 1)){
             if (scope->fct.chanRead(scope, i + 1) == 0)
@@ -107,14 +100,9 @@ int main(int argc, char* argv[]){
     GFX_drawScope(gfx);
     GFX_update(gfx);
 
-    uint32_t cTime, pTime, dTime;
     SDL_Event e;
 
     uint32_t locked = 1, read_channel_info = 1;
-    uint32_t fps, fps_avg, fps_min, fps_max;
-    fps = fps_avg = fps_max = 0;
-    fps_min = __UINT32_MAX__;
-    cTime = pTime = dTime = SDL_GetTicks();
     while(!exit){
         while(SDL_PollEvent(&e)){
             switch(e.type){
@@ -130,41 +118,45 @@ int main(int argc, char* argv[]){
                             break;
                     }
                     break;
-                case SDL_MOUSEMOTION:
-                    mouse_w = SDL_GetMouseFocus();
-                    if(mouse_w == gfx->w){
-                        if (locked){
-                            scope->fct.unlockScope(scope);
-                            locked = 0;
-                            read_channel_info = 1;
-                        }
-                    }else{
-                        locked = 1;
-                        if (read_channel_info){
-                            GFX_clearScreen(gfx); // clear screen for text at the bottom
+                case SDL_KEYUP:
+                    switch(e.key.keysym.sym){
+                        case SDLK_l: // LOCK / UNLOCK scope with L key
+                            if (locked){
+                                scope->fct.unlockScope(scope);
+                                locked = 0;
+                                read_channel_info = 1;
+                            }else{
+                                locked = 1;
+                                if (read_channel_info){
+                                    GFX_clearScreen(gfx); // clear screen for text at the bottom
 
-                            scope->fct.sampleRate(scope);
-                            scope->fct.timeScale(scope);
-                            scope->fct.timeOffset(scope);
+                                    scope->fct.sampleRate(scope);
+                                    scope->fct.timeScale(scope);
+                                    scope->fct.timeOffset(scope);
 
-                            GFX_printScopeInfo(gfx, BORDER / 2, scope->screen.height * scope->screen.zoom + BORDER, scope->time_scale, scope->time_offset, 0xFFFFFFFF); // print scope information bottom right
-                            for (i= 0; i < scope->channels; i++){
-                                if (scope->fct.isChanEnabled(scope, i + 1)){
-                                    // Get channel info
-                                    scope->fct.chanVScale(scope, i + 1);
-                                    scope->fct.chanVOffset(scope, i + 1);
-                                    scope->fct.chanProbe(scope, i + 1);
-                                    // Draw channel info
-                                    GFX_enableChannel(gfx, i + 1);
-                                    GFX_drawChannelCursor(gfx, scope->c[i].color, scope->c[i].Voffset, scope->c[i].Vscale, scope->screen.px_vert_div, scope->screen.px_center);
-                                    GFX_printChannelInfo(gfx, i + 1, BORDER / 2, scope->screen.height * scope->screen.zoom + BORDER, 2, scope->c[i].Vscale, scope->c[i].Voffset, scope->c[i].color); // print channel info bottom left
-                                }else{
-                                    GFX_disableChannel(gfx, i + 1);
+                                    // TODO draw trigger cursor
+
+
+                                    GFX_printScopeInfo(gfx, BORDER / 2, scope->screen.height * scope->screen.zoom + BORDER, scope->time_scale, scope->time_offset, 0xFFFFFFFF); // print scope information bottom right
+                                    for (i= 0; i < scope->channels; i++){
+                                        if (scope->fct.isChanEnabled(scope, i + 1)){
+                                            // Get channel info
+                                            scope->fct.chanVScale(scope, i + 1);
+                                            scope->fct.chanVOffset(scope, i + 1);
+                                            scope->fct.chanProbe(scope, i + 1);
+                                            // Draw channel info
+                                            GFX_enableChannel(gfx, i + 1);
+                                            GFX_drawChannelCursor(gfx, scope->c[i].color, scope->c[i].Voffset, scope->c[i].Vscale, scope->screen.px_vert_div, scope->screen.px_center);
+                                            GFX_printChannelInfo(gfx, i + 1, BORDER / 2, scope->screen.height * scope->screen.zoom + BORDER, 2, scope->c[i].Vscale, scope->c[i].Voffset, scope->c[i].color); // print channel info bottom left
+                                        }else{
+                                            GFX_disableChannel(gfx, i + 1);
+                                        }
+                                    }
+
+                                    read_channel_info = 0;
                                 }
                             }
-
-                            read_channel_info = 0;
-                        }
+                            break;
                     }
                     break;
             }
@@ -173,28 +165,15 @@ int main(int argc, char* argv[]){
         if (locked){
             for (i = 0; i < scope->channels; i++){
                 if (scope->c[i].enabled){
-                    if (scope->fct.chanRead(scope, i + 1) == 0)
+                    if (scope->fct.chanRead(scope, i + 1) == 0){
                         GFX_drawChannel(gfx, i + 1, scope->c[i].raw_data, scope->wave.max_data_run, scope->c[i].color);
+                    }
                 }
             }
             GFX_drawScope(gfx);
             GFX_update(gfx);
-
-            dTime = SDL_GetTicks() - cTime; // delta time
-            cTime = SDL_GetTicks(); // current time
-            if (dTime){
-                fps = 1000/dTime;
-                //printf("fps = %d\n", fps);
-                fps_avg = (int)((float)(fps_avg + fps)/2.0+0.5);
-                if (fps > fps_max)
-                    fps_max = fps;
-                else if (fps < fps_min)
-                    fps_min = fps;
-            }
         }
     }
-
-    printf("\n\nFPS:\n----\navg = %d\nmax = %d\nmin = %d\n", fps_avg, fps_max, fps_min);
 
     //Disable and destroy Gfx stuff
     GFX_free(gfx);

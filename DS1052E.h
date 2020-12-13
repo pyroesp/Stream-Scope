@@ -22,6 +22,8 @@
  > Height of oscilloscope can be extended to 250
     - This adds 2 extra vertical divisions (one at the top and one at the bottom),
       which are not displayed IRL
+      If you choose to show those extra vertical divisions be aware that the signal may
+      be clipping to the highest/lowest values!
 **/
 #define DS1052E_SCOPE_H 250
 

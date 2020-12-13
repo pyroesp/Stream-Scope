@@ -14,7 +14,7 @@ int SCOPE_openVISA(Scope *pScope){
     viOpenDefaultRM(&pScope->defaultRM);
 
     // Acquire USB resource of VISA, copied from example program
-    viFindRsrc(pScope->defaultRM, "USB?*", &vi_list, &nmatches, matches);
+    viFindRsrc(pScope->defaultRM, "?*INSTR", &vi_list, &nmatches, matches);
     vi_status = viOpen(pScope->defaultRM, matches, VI_NULL, VI_NULL, &pScope->vi);
     if (vi_status != VI_SUCCESS){
         return -1;

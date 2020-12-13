@@ -5,6 +5,7 @@
 #include <stdio.h>
 // check whether __int64 is defined, if not then define it
 // add your own compiler definition here, I'm just lazy
+// PS: needed for visa
 #ifndef __int64
     #ifdef __MINGW32__
         #include <_mingw.h>

@@ -1,5 +1,3 @@
-obj/
-bin/
-*.cbp
-*.depend
-*.layout
+*.dll
+*.exe
+*.o

@@ -25,6 +25,14 @@ typedef struct{
     TTF_Font *font;
 }Gfx;
 
+enum{
+    GFX_CURSOR_POINT_UP = 0,
+    GFX_CURSOR_POINT_DOWN,
+    GFX_CURSOR_POINT_LEFT,
+    GFX_CURSOR_POINT_RIGHT
+};
+
+
 Gfx* GFX_initWindow(int zoom_factor, int window_width, int window_height);
 void GFX_initScope(Gfx* g, int x, int y, int width, int height, int origin_y, int channels);
 void GFX_free(Gfx* g);
@@ -37,6 +45,8 @@ void GFX_drawScope(Gfx *g);
 void GFX_clearScreen(Gfx *g);
 
 void GFX_drawChannelCursor(Gfx *g, uint32_t color, float Voffset, float Vscale, uint32_t px_vert_div, uint32_t px_center);
+
+void GFX_drawCursor(Gfx *g, uint32_t color, float offset, float scale, uint32_t px_div, uint32_t px_center, uint32_t cursor_dir);
 
 void GFX_loadTTF(Gfx *g, char *path, int ptsize);
 void GFX_printScopeInfo(Gfx *g, int x_offset, int y, float time_scale, float time_offset, uint32_t color);
