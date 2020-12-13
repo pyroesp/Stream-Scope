@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 #endif
     }else{
         SCOPE_closeVISA(scope);
-        printf("Device not supported.\nDevice: %s.\n", scope->deviceID);
+        printf("Device not found or supported.\n");
         return -1; // device not supported
     }
 
