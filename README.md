@@ -8,6 +8,8 @@ For now I've only ever tested it with my DS1052E and a friend's DS1054Z.
 It has been made with the DS1052E in mind so there are, probably, bugs if you use it for other oscilloscopes.  
 So it's far from perfect, don't expect many updates either.  
 
+<img src="stream scope.png">
+
 ## Why:
 ----------
 
