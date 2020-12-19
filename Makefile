@@ -1,4 +1,3 @@
-
 CXX = gcc
 
 EXE = stream_scope
@@ -27,4 +26,4 @@ $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(EXE) $(OBJS)
+	del $(EXE) $(OBJS)
