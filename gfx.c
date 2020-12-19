@@ -96,51 +96,70 @@ void GFX_setPixel(SDL_Surface *surface, int x, int y, uint32_t pixel)
 
 // Draw background onto bg surface
 void GFX_generateBg(Gfx *g, int px_vert_div, int px_hori_div){
-    int x, y;
-    SDL_FillRect(g->bg, NULL, 0xFF222222);
-    for (y = 0; y < g->sh*g->zoom_factor; y++){
-        for (x = 0; x < g->sw*g->zoom_factor; x++){
-            /** Draw edges **/
-            if (x == 0 || y == 0){
-                GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
-                if (y % (5*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x+1, y, 0xFFAAAAAA);
-                if (x % (5*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x, y+1, 0xFFAAAAAA);
-                if (y % (px_vert_div*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x+2, y, 0xFFAAAAAA);
-                if (x % (px_hori_div*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x, y+2, 0xFFAAAAAA);
+    uint32_t x, y;
+    uint32_t *px = NULL;
+    for (y = 0; y < g->sh * g->zoom_factor; y++){
+        for (x = 0; x < g->sw * g->zoom_factor; x++){
+            // Get pixel
+            px = ((uint32_t*)g->bg->pixels) + y * (g->sw * g->zoom_factor) + x;
+            // Set bg color
+            *px = 0xFF222222;
+            // Draw borders
+            if (x == 0 || y == 0)
+                *px = 0xFFAAAAAA;
+            if (x == (g->sw * g->zoom_factor - 1) || y == (g->sh * g->zoom_factor - 1))
+                *px = 0xFFAAAAAA;
+        }
+    }
+    
+    for (y = 0; y < g->sh * g->zoom_factor; y++){
+        for (x = 0; x < g->sw * g->zoom_factor; x++){
+            // Get pixel
+            px = ((uint32_t*)g->bg->pixels) + y * (g->sw * g->zoom_factor) + x;
+            
+            // Draw border dots
+            if (x == 0){
+                if (y % (5 * g->zoom_factor) == 0)
+                    *(px + 1) = 0xFFAAAAAA;
+                if (y % (px_vert_div * g->zoom_factor) == 0)
+                    *(px + 2) = 0xFFAAAAAA;
             }
-            if (x == g->sw*g->zoom_factor-1 || y == g->sh*g->zoom_factor-1){
-                GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
-                if (y % (5*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x-1, y, 0xFFAAAAAA);
-                if (x % (5*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x, y-1, 0xFFAAAAAA);
-                if (y % (px_vert_div*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x-2, y, 0xFFAAAAAA);
-                if (x % (px_hori_div*g->zoom_factor) == 0)
-                    GFX_setPixel(g->bg, x, y-2, 0xFFAAAAAA);
+            if (y == 0){
+                if (x % (5 * g->zoom_factor) == 0)
+                    *(px + (g->sw * g->zoom_factor)) = 0xFFAAAAAA;
+                if (x % (px_hori_div * g->zoom_factor) == 0)
+                    *(px + (g->sw * g->zoom_factor) * 2) = 0xFFAAAAAA;
+            }
+            if (x == g->sw * g->zoom_factor - 1){
+                if (y % (5 * g->zoom_factor) == 0)
+                    *(px - 1) = 0xFFAAAAAA;
+                if (y % (px_vert_div * g->zoom_factor) == 0)
+                    *(px - 2) = 0xFFAAAAAA;
+            }
+            if (y == g->sh * g->zoom_factor - 1){
+                if (x % (5 * g->zoom_factor) == 0)
+                    *(px - (g->sw * g->zoom_factor)) = 0xFFAAAAAA;
+                if (x % (px_hori_div * g->zoom_factor) == 0)
+                    *(px - (g->sw * g->zoom_factor) * 2) = 0xFFAAAAAA;
             }
 
-            /** Draw internal dots **/
-            if ((x % (px_hori_div*g->zoom_factor)) == 0)
-                if ((y % (5*g->zoom_factor)) == 0)
-                    GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
+            // Draw internal dots
+            if ((x % (px_hori_div * g->zoom_factor)) == 0)
+                if ((y % (5 * g->zoom_factor)) == 0)
+                    *px = 0xFFAAAAAA;
             if ((y % (px_vert_div*g->zoom_factor)) == 0)
-                if ((x % (5*g->zoom_factor)) == 0)
-                    GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
+                if ((x % (5 * g->zoom_factor)) == 0)
+                    *px = 0xFFAAAAAA;
 
-            /** Draw Vertical **/
-            if (x >= ((g->sw/2) - 1)*g->zoom_factor && x <= ((g->sw/2) + 1)*g->zoom_factor)
-                if ((y % (5*g->zoom_factor)) == 0)
-                    GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
+            // Draw middle vertical
+            if (x >= ((g->sw/2) - 1) * g->zoom_factor && x <= ((g->sw/2) + 1) * g->zoom_factor)
+                if ((y % (5 * g->zoom_factor)) == 0)
+                    *px = 0xFFAAAAAA;
 
-            /**  Draw Horizontal **/
-            if (y >= ((g->sh/2) - 1)*g->zoom_factor && y <= ((g->sh/2) + 1)*g->zoom_factor)
-                if ((x % (5*g->zoom_factor)) == 0)
-                    GFX_setPixel(g->bg, x, y, 0xFFAAAAAA);
+            //  Draw middle horizontal
+            if (y >= ((g->sh/2) - 1) * g->zoom_factor && y <= ((g->sh/2) + 1) * g->zoom_factor)
+                if ((x % (5 * g->zoom_factor)) == 0)
+                    *px = 0xFFAAAAAA;
         }
     }
 }
