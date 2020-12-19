@@ -100,7 +100,7 @@ int DS1052E_chanRead(void *pScope, int channel){
                       The 10 bytes header is included into the total 1M or 512K samples
         **/
         memcpy(&c->raw_data[0], &c->rd_buf[s->wave.header], sizeof(uint8_t) * (s->wave.max_data - s->wave.header));
-        int raw_data_idx = s->wave.max_data - s->wave.header;
+        uint32_t raw_data_idx = s->wave.max_data - s->wave.header;
         for (; raw_data_idx < c->size_raw_data - s->wave.header;){
             /** Read directly into raw_data array. After first read, everything is data **/
             vi_status = viRead(s->vi, &c->raw_data[raw_data_idx], s->wave.max_data, (ViPUInt32)&ret_cnt); // Read X data bytes
